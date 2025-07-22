@@ -8,3 +8,13 @@ def sample_products():
         Product("Iphone 15", "512GB, Gray space", 210000.0, 8),
         Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
     ]
+
+
+@pytest.fixture
+def sample_category(sample_products):
+    return Category(
+        "Смартфоны",
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+        sample_products
+    )
+
