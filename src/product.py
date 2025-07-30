@@ -19,7 +19,6 @@ class Product:
         self.price = price
         self.quantity = quantity
 
-
     @classmethod
     def new_product(cls, product_data: dict, products_list: list = None):
         """
@@ -60,7 +59,8 @@ class Product:
             print("Цена не должна быть нулевая или отрицательная")
             return
 
-        if new_price < self.__price:
+        # Проверяем, существует ли уже атрибут __price (для инициализации)
+        if hasattr(self, '_Product__price') and new_price < self.__price:
             confirm = input(f"Цена снижается с {self.__price} до {new_price}. Подтвердите (y/n): ")
             if confirm.lower() != 'y':
                 print("Изменение цены отменено")
