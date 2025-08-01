@@ -1,6 +1,6 @@
 import pytest
 import json
-from src.product import Product, Category
+from src.product import Product, Category, CategoryIterator
 
 
 @pytest.fixture

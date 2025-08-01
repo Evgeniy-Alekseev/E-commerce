@@ -1,7 +1,7 @@
 import pytest
 from io import StringIO
 from unittest.mock import patch
-from src.product import Product, Category
+from src.product import Product, Category, CategoryIterator
 
 
 def test_category_count(sample_category):
@@ -233,3 +233,69 @@ def test_category_products_getter_empty():
     """Тест геттера продуктов для пустой категории"""
     empty_category = Category("Empty", "No products", [])
     assert empty_category.products == ""
+
+
+def test_product_str_representation(sample_products):
+    """Тест строкового представления продукта"""
+    product = sample_products[0]
+    expected_str = "Samsung Galaxy S23 Ultra, 180000.0 руб. Остаток: 5 шт."
+    assert str(product) == expected_str
+
+
+def test_category_str_representation(sample_category):
+    """Тест строкового представления категории"""
+    expected_str = "Смартфоны, количество продуктов: 27 шт."  # 5 + 8 + 14
+    assert str(sample_category) == expected_str
+
+
+def test_product_addition(sample_products):
+    """Тест сложения продуктов"""
+    p1, p2, _ = sample_products
+    total = p1 + p2
+    expected = p1.price * p1.quantity + p2.price * p2.quantity
+    assert total == expected
+
+
+def test_product_addition_with_wrong_type(sample_products):
+    """Тест сложения продукта с неправильным типом"""
+    p1 = sample_products[0]
+    with pytest.raises(TypeError):
+        _ = p1 + "not a product"
+
+
+def test_category_iteration(sample_category):
+    """Тест итерации по категории"""
+    product_names = [product.name for product in sample_category]
+    expected_names = [
+        "Samsung Galaxy S23 Ultra",
+        "Iphone 15",
+        "Xiaomi Redmi Note 11"
+    ]
+    assert product_names == expected_names
+
+
+def test_category_empty_iteration(empty_category):
+    """Тест итерации по пустой категории"""
+    products = list(empty_category)  # Преобразуем итератор в список
+    assert products == []
+
+
+def test_category_multiple_iterations(sample_category):
+    """Тест нескольких итераций по одной категории"""
+    # Первая итерация
+    first_iter = [p.name for p in sample_category]
+    # Вторая итерация
+    second_iter = [p.name for p in sample_category]
+    assert first_iter == second_iter
+
+
+def test_category_products_property_after_str(sample_category):
+    """Тест что геттер products работает корректно после добавления __str__"""
+    products_str = sample_category.products
+    expected_lines = [
+        "Samsung Galaxy S23 Ultra, 180000.0 руб. Остаток: 5 шт.",
+        "Iphone 15, 210000.0 руб. Остаток: 8 шт.",
+        "Xiaomi Redmi Note 11, 31000.0 руб. Остаток: 14 шт."
+    ]
+    for line in expected_lines:
+        assert line in products_str

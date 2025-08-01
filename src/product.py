@@ -46,19 +46,19 @@ class Product:
 
         # Проверка на дубликаты
         for existing_product in products_list:
-            if existing_product.name == product_data['name']:
+            if existing_product.name == product_data["name"]:
                 # Объединяем количество
-                existing_product.quantity += product_data['quantity']
+                existing_product.quantity += product_data["quantity"]
                 # Выбираем максимальную цену
-                if existing_product.price < product_data['price']:
-                    existing_product.price = product_data['price']
+                if existing_product.price < product_data["price"]:
+                    existing_product.price = product_data["price"]
                 return existing_product
 
         return cls(
-            name=product_data['name'],
-            description=product_data['description'],
-            price=product_data['price'],
-            quantity=product_data['quantity']
+            name=product_data["name"],
+            description=product_data["description"],
+            price=product_data["price"],
+            quantity=product_data["quantity"],
         )
 
     @property
@@ -74,9 +74,11 @@ class Product:
             return
 
         # Проверяем, существует ли уже атрибут __price (для инициализации)
-        if hasattr(self, '_Product__price') and new_price < self.__price:
-            confirm = input(f"Цена снижается с {self.__price} до {new_price}. Подтвердите (y/n): ")
-            if confirm.lower() != 'y':
+        if hasattr(self, "_Product__price") and new_price < self.__price:
+            confirm = input(
+                f"Цена снижается с {self.__price} до {new_price}. Подтвердите (y/n): "
+            )
+            if confirm.lower() != "y":
                 print("Изменение цены отменено")
                 return
 
