@@ -19,6 +19,20 @@ class Product:
         self.price = price
         self.quantity = quantity
 
+    def __str__(self):
+        """Строковое представление продукта"""
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other):
+        """
+        Сложение двух продуктов по формуле: цена * количество + цена * количество
+        :param other: Другой объект Product
+        :return: Сумма произведений цены на количество
+        """
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты Product")
+        return self.price * self.quantity + other.price * other.quantity
+
     @classmethod
     def new_product(cls, product_data: dict, products_list: list = None):
         """
@@ -68,6 +82,7 @@ class Product:
 
         self.__price = new_price
 
+
 class Category:
     """Класс для представления категорий товаров."""
 
@@ -91,6 +106,15 @@ class Category:
         Category.category_count += 1
         Category.product_count += len(products)
 
+    def __str__(self):
+        """Строковое представление категории"""
+        total_quantity = sum(product.quantity for product in self._Category__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
+
+    def __iter__(self):
+        """Возвращает итератор для продуктов категории"""
+        return CategoryIterator(self)
+
     def add_product(self, product):
         """Добавляет продукт в категорию"""
         self.__products.append(product)
@@ -98,8 +122,29 @@ class Category:
 
     @property
     def products(self) -> str:
-        """Геттер для списка продуктов в виде строки"""
-        products_str = ""
-        for product in self.__products:
-            products_str += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
-        return products_str.strip()
+        """Геттер для списка продуктов в виде строки с помощью __str__"""
+        return "\n".join(str(product) for product in self._Category__products)
+
+
+class CategoryIterator:
+    """Класс для итерации по товарам категории"""
+
+    def __init__(self, category):
+        """
+        Инициализация итератора
+        :param category: Объект Category для итерации
+        """
+        self.category = category
+        self.index = 0
+
+    def __iter__(self):
+        """Возвращает сам объект как итератор"""
+        return self
+
+    def __next__(self):
+        """Возвращает следующий продукт в категории"""
+        if self.index < len(self.category._Category__products):
+            product = self.category._Category__products[self.index]
+            self.index += 1
+            return product
+        raise StopIteration
