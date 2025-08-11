@@ -1,6 +1,9 @@
 import pytest
 import json
-from src.product import Product, Category, CategoryIterator
+import tempfile
+from pathlib import Path
+from src.product import Product, Category
+from src.utils import load_categories_from_json
 
 
 @pytest.fixture
