@@ -29,9 +29,11 @@ class Product:
         :param other: Другой объект Product
         :return: Сумма произведений цены на количество
         """
-        if not isinstance(other, Product):
-            raise TypeError("Можно складывать только объекты Product")
-        return self.price * self.quantity + other.price * other.quantity
+        if type(self) != type(other):
+            raise TypeError("Нельзя складывать товары разных классов")
+        total_price = (self.price * self.quantity) + (other.price * other.quantity)
+        total_quantity = self.quantity + other.quantity
+        return total_price
 
     @classmethod
     def new_product(cls, product_data: dict, products_list: list = None):
@@ -39,10 +41,16 @@ class Product:
         Создает новый продукт из словаря данных
         :param product_data: Словарь с данными продукта
         :param products_list: Список существующих продуктов для проверки дубликатов
-        :return: Экземпляр класса Product
+        :return: Экземпляр класса Product или его наследников
+        :raises TypeError: Если products_list содержит не только объекты Product или его наследников
         """
         if products_list is None:
             products_list = []
+
+        # Проверка, что все элементы в products_list являются Product или его наследниками
+        for product in products_list:
+            if not isinstance(product, Product):
+                raise TypeError("products_list может содержать только объекты Product или его наследников")
 
         # Проверка на дубликаты
         for existing_product in products_list:
@@ -119,6 +127,8 @@ class Category:
 
     def add_product(self, product):
         """Добавляет продукт в категорию"""
+        if not isinstance(product, Product):
+            raise TypeError("Можно добавлять только объекты Product или его наследников")
         self.__products.append(product)
         Category.product_count += 1
 
