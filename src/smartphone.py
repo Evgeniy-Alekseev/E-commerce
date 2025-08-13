@@ -3,7 +3,7 @@ from src.product import Product
 
 class Smartphone(Product):
     """
-    Класс для смартфонов, наследуется от Product
+    Класс для представления смартфона, наследуется от Product
     """
 
     name: str
@@ -32,10 +32,11 @@ class Smartphone(Product):
 
     def __add__(self, other):
         """
-        Сложение двух продуктов по формуле: цена * количество + цена * количество
-        :param other: Другой объект
+        Сложение двух смартфонов по формуле: цена * количество + цена * количество
+        :param other: Другой объект Smartphone
         :return: Сумма произведений цены на количество
         """
-        if type(other) is Smartphone:
-            raise TypeError("Можно складывать только объекты Smartphone")
-        return self.price * self.quantity + other.price * other.quantity
+        if type(self) != type(other):
+            raise TypeError("Нельзя складывать товары разных классов")
+        # Вызываем метод __add__ родительского класса
+        return super().__add__(other)

@@ -1,9 +1,10 @@
-import pytest
 import json
-import tempfile
-from pathlib import Path
+
+import pytest
+
+from src.lawngrass import LawnGrass
 from src.product import Product, Category
-from src.utils import load_categories_from_json
+from src.smartphone import Smartphone
 
 
 @pytest.fixture
@@ -72,7 +73,6 @@ def sample_products_json(tmp_path):
     json_file = tmp_path / "test_products.json"
     with open(json_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
     return json_file  # Возвращаем путь к файлу
 
 
@@ -112,3 +112,60 @@ def price_change_data():
         "negative": -50.0,
         "decrease": 90.0
     }
+
+@pytest.fixture
+def sample_smartphone():
+    """Фикстура для создания тестового смартфона"""
+    return Smartphone(
+        name="iPhone 15 Pro",
+        description="Latest model from Apple",
+        price=120000.0,
+        quantity=3,
+        efficiency="A17 Bionic",
+        model="iPhone 15 Pro",
+        memory="256GB",
+        color="Titanium"
+    )
+
+
+@pytest.fixture
+def sample_lawn_grass():
+    """Фикстура для создания тестовой газонной травы"""
+    return LawnGrass(
+        name="Premium Lawn Grass",
+        description="High quality lawn grass seeds",
+        price=5000.0,
+        quantity=10,
+        country="Netherlands",
+        germination_period="7-14 days",
+        color="Green"
+    )
+
+
+@pytest.fixture
+def another_smartphone():
+    """Фикстура для создания второго тестового смартфона"""
+    return Smartphone(
+        name="Samsung Galaxy S24",
+        description="Flagship model from Samsung",
+        price=110000.0,
+        quantity=5,
+        efficiency="Snapdragon 8 Gen 3",
+        model="Galaxy S24",
+        memory="512GB",
+        color="Phantom Black"
+    )
+
+
+@pytest.fixture
+def another_lawn_grass():
+    """Фикстура для создания второй тестовой газонной травы"""
+    return LawnGrass(
+        name="Economy Lawn Grass",
+        description="Affordable lawn grass seeds",
+        price=3000.0,
+        quantity=20,
+        country="USA",
+        germination_period="10-20 days",
+        color="Dark Green"
+    )

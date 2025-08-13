@@ -3,7 +3,7 @@ from src.product import Product
 
 class LawnGrass(Product):
     """
-    Класс для газонной травы, наследуется от Product
+    Класс для представления газонной травы, наследуется от Product
     """
 
     name: str
@@ -29,10 +29,11 @@ class LawnGrass(Product):
 
     def __add__(self, other):
         """
-        Сложение двух продуктов по формуле: цена * количество + цена * количество
-        :param other: Другой объект
+        Сложение двух видов газонной травы по формуле: цена * количество + цена * количество
+        :param other: Другой объект LawnGrass
         :return: Сумма произведений цены на количество
         """
-        if type(other) is LawnGrass:
-            raise TypeError("Можно складывать только объекты LawnGrass")
-        return self.price * self.quantity + other.price * other.quantity
+        if type(self) != type(other):
+            raise TypeError("Нельзя складывать товары разных классов")
+        # Вызываем метод __add__ родительского класса
+        return super().__add__(other)

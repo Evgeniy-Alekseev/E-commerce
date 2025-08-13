@@ -32,7 +32,6 @@ class Product:
         if type(self) != type(other):
             raise TypeError("Нельзя складывать товары разных классов")
         total_price = (self.price * self.quantity) + (other.price * other.quantity)
-        total_quantity = self.quantity + other.quantity
         return total_price
 
     @classmethod
@@ -129,7 +128,7 @@ class Category:
         """Добавляет продукт в категорию"""
         if not isinstance(product, Product):
             raise TypeError("Можно добавлять только объекты Product или его наследников")
-        self.__products.append(product)
+        self._Category__products.append(product)
         Category.product_count += 1
 
     @property
