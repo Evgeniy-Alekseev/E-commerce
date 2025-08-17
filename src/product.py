@@ -19,32 +19,53 @@ class Product:
         self.price = price
         self.quantity = quantity
 
+    def __str__(self):
+        """Строковое представление продукта"""
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other):
+        """
+        Сложение двух продуктов по формуле: цена * количество + цена * количество
+        :param other: Другой объект Product
+        :return: Сумма произведений цены на количество
+        """
+        if type(self) != type(other):
+            raise TypeError("Нельзя складывать товары разных классов")
+        total_price = (self.price * self.quantity) + (other.price * other.quantity)
+        return total_price
+
     @classmethod
     def new_product(cls, product_data: dict, products_list: list = None):
         """
         Создает новый продукт из словаря данных
         :param product_data: Словарь с данными продукта
         :param products_list: Список существующих продуктов для проверки дубликатов
-        :return: Экземпляр класса Product
+        :return: Экземпляр класса Product или его наследников
+        :raises TypeError: Если products_list содержит не только объекты Product или его наследников
         """
         if products_list is None:
             products_list = []
 
+        # Проверка, что все элементы в products_list являются Product или его наследниками
+        for product in products_list:
+            if not isinstance(product, Product):
+                raise TypeError("products_list может содержать только объекты Product или его наследников")
+
         # Проверка на дубликаты
         for existing_product in products_list:
-            if existing_product.name == product_data['name']:
+            if existing_product.name == product_data["name"]:
                 # Объединяем количество
-                existing_product.quantity += product_data['quantity']
+                existing_product.quantity += product_data["quantity"]
                 # Выбираем максимальную цену
-                if existing_product.price < product_data['price']:
-                    existing_product.price = product_data['price']
+                if existing_product.price < product_data["price"]:
+                    existing_product.price = product_data["price"]
                 return existing_product
 
         return cls(
-            name=product_data['name'],
-            description=product_data['description'],
-            price=product_data['price'],
-            quantity=product_data['quantity']
+            name=product_data["name"],
+            description=product_data["description"],
+            price=product_data["price"],
+            quantity=product_data["quantity"],
         )
 
     @property
@@ -60,13 +81,16 @@ class Product:
             return
 
         # Проверяем, существует ли уже атрибут __price (для инициализации)
-        if hasattr(self, '_Product__price') and new_price < self.__price:
-            confirm = input(f"Цена снижается с {self.__price} до {new_price}. Подтвердите (y/n): ")
-            if confirm.lower() != 'y':
+        if hasattr(self, "_Product__price") and new_price < self.__price:
+            confirm = input(
+                f"Цена снижается с {self.__price} до {new_price}. Подтвердите (y/n): "
+            )
+            if confirm.lower() != "y":
                 print("Изменение цены отменено")
                 return
 
         self.__price = new_price
+
 
 class Category:
     """Класс для представления категорий товаров."""
@@ -91,15 +115,47 @@ class Category:
         Category.category_count += 1
         Category.product_count += len(products)
 
+    def __str__(self):
+        """Строковое представление категории"""
+        total_quantity = sum(product.quantity for product in self._Category__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
+
+    def __iter__(self):
+        """Возвращает итератор для продуктов категории"""
+        return CategoryIterator(self)
+
     def add_product(self, product):
         """Добавляет продукт в категорию"""
-        self.__products.append(product)
+        if not isinstance(product, Product):
+            raise TypeError("Можно добавлять только объекты Product или его наследников")
+        self._Category__products.append(product)
         Category.product_count += 1
 
     @property
     def products(self) -> str:
-        """Геттер для списка продуктов в виде строки"""
-        products_str = ""
-        for product in self.__products:
-            products_str += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
-        return products_str.strip()
+        """Геттер для списка продуктов в виде строки с помощью __str__"""
+        return "\n".join(str(product) for product in self._Category__products)
+
+
+class CategoryIterator:
+    """Класс для итерации по товарам категории"""
+
+    def __init__(self, category):
+        """
+        Инициализация итератора
+        :param category: Объект Category для итерации
+        """
+        self.category = category
+        self.index = 0
+
+    def __iter__(self):
+        """Возвращает сам объект как итератор"""
+        return self
+
+    def __next__(self):
+        """Возвращает следующий продукт в категории"""
+        if self.index < len(self.category._Category__products):
+            product = self.category._Category__products[self.index]
+            self.index += 1
+            return product
+        raise StopIteration
