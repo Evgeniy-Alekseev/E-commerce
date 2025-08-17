@@ -3,32 +3,28 @@ from src.product import Product
 
 class Smartphone(Product):
     """
-    Класс для представления смартфона, наследуется от Product
+    Класс для представления смартфона, наследуется от Product.
     """
 
-    name: str
-    description: str
-    price: float
-    quantity: int
-    efficiency: str
-    model: str
-    memory: int
-    color: str
-
-
-    def __init__(self, name, description, price, quantity, efficiency, model, memory, color):
+    def __init__(self, name: str, description: str, price: float, quantity: int,
+                 efficiency: str, model: str, memory: str, color: str):
         """
-        Инициализация смартфона
-        :param efficiency: Производительность (в условных единицах)
+        Инициализация смартфона.
+
+        :param name: Название продукта
+        :param description: Описание продукта
+        :param price: Цена продукта
+        :param quantity: Количество на складе
+        :param efficiency: Производительность
         :param model: Модель смартфона
-        :param memory: Объем встроенной памяти (в ГБ)
+        :param memory: Объем встроенной памяти
         :param color: Цвет смартфона
         """
-        super().__init__(name, description, price, quantity)
         self.efficiency = efficiency
         self.model = model
         self.memory = memory
         self.color = color
+        super().__init__(name, description, price, quantity)
 
     def __add__(self, other):
         """

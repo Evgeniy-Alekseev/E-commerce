@@ -1,3 +1,6 @@
+from typing import List
+
+from src.abstract_entity import AbstractEntity
 from src.base_product import BaseProduct
 from src.creatable_mixin import CreatableMixin
 
@@ -5,12 +8,7 @@ from src.creatable_mixin import CreatableMixin
 class Product(CreatableMixin, BaseProduct):
     """Класс для представления продукта."""
 
-    name: str
-    description: str
-    price: float
-    quantity: int
-
-    def __init__(self, name, description, price, quantity):
+    def __init__(self, name: str, description: str, price: float, quantity: int):
         """
         Инициализация продукта
         :param name: Название продукта
@@ -97,26 +95,21 @@ class Product(CreatableMixin, BaseProduct):
         self.__price = new_price
 
 
-class Category:
+class Category(AbstractEntity):
     """Класс для представления категорий товаров."""
 
-    name: str
-    description: str
-    products: list
     category_count = 0
     product_count = 0
 
-    def __init__(self, name, description, products):
+    def __init__(self, name: str, description: str, products: List[Product]):
         """
         Инициализация категории
         :param name: Название категории
         :param description: Описание категории
         :param products: Список продуктов в категории
         """
-        self.name = name
-        self.description = description
         self.__products = products
-
+        super().__init__(name, description)
         Category.category_count += 1
         Category.product_count += len(products)
 
@@ -145,7 +138,7 @@ class Category:
 class CategoryIterator:
     """Класс для итерации по товарам категории"""
 
-    def __init__(self, category):
+    def __init__(self, category: Category):
         """
         Инициализация итератора
         :param category: Объект Category для итерации
