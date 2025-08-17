@@ -1,7 +1,8 @@
 from src.base_product import BaseProduct
+from src.creatable_mixin import CreatableMixin
 
 
-class Product(BaseProduct):
+class Product(CreatableMixin, BaseProduct):
     """Класс для представления продукта."""
 
     name: str
@@ -21,12 +22,13 @@ class Product(BaseProduct):
         self.description = description
         self.price = price
         self.quantity = quantity
+        super().__init__(name, description, price, quantity)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Строковое представление продукта"""
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
-    def __add__(self, other):
+    def __add__(self, other: object) -> float:
         """
         Сложение двух продуктов по формуле: цена * количество + цена * количество
         :param other: Другой объект Product
