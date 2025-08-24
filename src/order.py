@@ -11,9 +11,9 @@ class Order(AbstractEntity):
     def __init__(self, product: Product, quantity: int):
         """
         Инициализация заказа.
-
         :param product: Товар в заказе
         :param quantity: Количество купленного товара
+        :raises ZeroQuantityError: Если количество товара равно нулю
         """
         try:
             if quantity <= 0:
@@ -24,7 +24,9 @@ class Order(AbstractEntity):
             self.total_cost = product.price * quantity
             super().__init__(f"Заказ {product.name}", f"Заказ товара {product.name}")
             print("Товар добавлен")
+
         except ZeroQuantityError as e:
             print(f"Ошибка добавления товара: {e}")
+            raise  # Пробрасываем исключение дальше
         finally:
             print("Обработка добавления товара завершена")

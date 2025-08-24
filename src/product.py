@@ -131,19 +131,27 @@ class Category(AbstractEntity):
         """
         Добавляет продукт в категорию.
         :param product: Продукт для добавления
+        :raises TypeError: Если передан не объект Product или его наследник
+        :raises ZeroQuantityError: Если количество товара равно нулю
         """
         try:
+            if not isinstance(product, Product):
+                raise TypeError("Можно добавлять только объекты Product или его наследников")
+
             if product.quantity <= 0:
                 raise ZeroQuantityError()
+
             self.__products.append(product)
             Category.product_count += 1
             print("Товар добавлен")
-        except ZeroQuantityError as e:
+
+        except (TypeError, ZeroQuantityError) as e:
             print(f"Ошибка добавления товара: {e}")
+            raise  # Пробрасываем исключение дальше для обработки в тестах
         finally:
             print("Обработка добавления товара завершена")
 
-    def average_price(self) -> float:
+    def middle_price(self) -> float:
         """
         Подсчитывает средний ценник всех товаров в категории.
         :return: Средняя цена товаров в категории, или 0 если категория пуста
@@ -151,8 +159,10 @@ class Category(AbstractEntity):
         try:
             if not self.__products:
                 raise ZeroDivisionError("В категории нет товаров")
+
             total_price = sum(product.price for product in self.__products)
             return total_price / len(self.__products)
+
         except ZeroDivisionError:
             return 0.0
 
