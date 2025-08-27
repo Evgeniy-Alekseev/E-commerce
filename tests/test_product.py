@@ -1,10 +1,10 @@
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 
+from src.custom_exceptions import ZeroQuantityError
 from src.product import Product, Category
 from src.smartphone import Smartphone
-from src.custom_exceptions import ZeroQuantityError
 
 
 def test_category_count(sample_category):
@@ -370,93 +370,52 @@ def test_category_add_product_invalid_type_none():
     assert len(category._Category__products) == 0
     assert Category.product_count == initial_product_count
 
-    def test_product_init_zero_quantity():
-        """Тест инициализации продукта с нулевым количеством вызывает ValueError"""
-        with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
-            Product("Test Product", "Test Description", 100.0, 0)
+def test_category_middle_price_empty(empty_category):
+    """Тест среднего ценника для пустой категории возвращает 0"""
+    assert empty_category.middle_price() == 0.0
 
-    def test_product_init_negative_quantity():
-        """Тест инициализации продукта с отрицательным количеством вызывает ValueError"""
-        with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
-            Product("Test Product", "Test Description", 100.0, -5)
 
-    def test_category_add_product_zero_quantity(monkeypatch):
-        """Тест добавления продукта с нулевым количеством в категорию"""
-        # Перехватываем вывод в stdout
-        captured_output = []
+def test_category_middle_price_with_products(sample_category):
+    """Тест среднего ценника для категории с товарами"""
+    # (180000 + 210000 + 31000) / 3 = 140333.333...
+    expected_avg = (180000.0 + 210000.0 + 31000.0) / 3
+    assert sample_category.middle_price() == pytest.approx(expected_avg)
 
-        def mock_print(*args):
-            captured_output.append(" ".join(map(str, args)))
 
-        monkeypatch.setattr('builtins.print', mock_print)
+def test_category_add_product_zero_quantity():
+    """Тест добавления товара с нулевым количеством в категорию"""
+    category = Category("Test Category", "Test Description", [])
 
-        category = Category("Test Category", "Test Description", [])
+    # Создаем продукт с нулевым количеством
+    product = Product("Test Product", "Test Description", 100.0, 0)
 
-        # Создаем фиктивный продукт с нулевым количеством для теста add_product
-        class MockProduct:
-            def __init__(self, name, description, price, quantity):
-                self.name = name
-                self.description = description
-                self.price = price
-                self.quantity = quantity
-
-        mock_product = MockProduct("Mock Product", "Mock Description", 50.0, 0)
-
-        # Вызываем метод add_product
-        category.add_product(mock_product)
-
-        # Проверяем вывод
-        output = " ".join(captured_output)
-        assert "Ошибка добавления товара: Товар с нулевым количеством не может быть добавлен" in output
-        assert "Обработка добавления товара завершена" in output
-        # Проверяем, что продукт не был добавлен
-        assert len(category._Category__products) == 0
-
-    def test_category_add_product_valid_product(monkeypatch):
-        """Тест добавления валидного продукта в категорию"""
-        # Перехватываем вывод в stdout
-        captured_output = []
-
-        def mock_print(*args):
-            captured_output.append(" ".join(map(str, args)))
-
-        monkeypatch.setattr('builtins.print', mock_print)
-
-        category = Category("Test Category", "Test Description", [])
-        product = Product("Valid Product", "Valid Description", 150.0, 3)
-
-        # Вызываем метод add_product
+    # Проверяем, что вызывается ValueError
+    with pytest.raises(ValueError):
         category.add_product(product)
 
-        # Проверяем вывод
-        output = " ".join(captured_output)
-        assert "Товар добавлен" in output
-        assert "Обработка добавления товара завершена" in output
-        # Проверяем, что продукт был добавлен
-        assert len(category._Category__products) == 1
-        assert category._Category__products[0] is product
 
-    def test_category_average_price_empty():
-        """Тест метода average_price для пустой категории"""
-        empty_category = Category("Empty Category", "No products", [])
-        avg_price = empty_category.middle_price()
-        assert avg_price == 0.0
+def test_category_add_product_negative_quantity():
+    """Тест добавления товара с отрицательным количеством в категорию"""
+    category = Category("Test Category", "Test Description", [])
 
-    def test_category_average_price_non_empty():
-        """Тест метода average_price для категории с продуктами"""
-        products = [
-            Product("Product 1", "Description 1", 100.0, 5),
-            Product("Product 2", "Description 2", 200.0, 3),
-            Product("Product 3", "Description 3", 150.0, 2)
-        ]
-        category = Category("Test Category", "Test Description", products)
-        avg_price = category.middle_price()
-        expected_avg = (100.0 + 200.0 + 150.0) / 3  # 150.0
-        assert avg_price == expected_avg
+    # Создаем продукт с отрицательным количеством
+    product = Product("Test Product", "Test Description", 100.0, -5)
 
-    def test_category_average_price_single_product():
-        """Тест метода average_price для категории с одним продуктом"""
-        product = Product("Single Product", "Single Description", 75.5, 10)
-        category = Category("Single Product Category", "One product", [product])
-        avg_price = category.middle_price()
-        assert avg_price == 75.5
+    # Проверяем, что вызывается ValueError
+    with pytest.raises(ValueError):
+        category.add_product(product)
+
+
+def test_category_add_product_valid_product():
+    """Тест добавления валидного продукта в категорию"""
+    category = Category("Test Category", "Test Description", [])
+
+    # Создаем валидный продукт (количество > 0)
+    product = Product("Valid Product", "Valid Description", 150.0, 3)
+
+    initial_product_count = Category.product_count
+    category.add_product(product)
+
+    assert len(category._Category__products) == 1
+    assert category._Category__products[0] is product
+    assert Category.product_count == initial_product_count + 1

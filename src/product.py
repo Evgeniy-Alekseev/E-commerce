@@ -19,8 +19,6 @@ class Product(CreatableMixin, BaseProduct):
         :param price: Цена продукта
         :param quantity: Количество на складе
         """
-        if quantity <= 0:
-            raise ValueError("Товар с нулевым количеством не может быть добавлен")
 
         self.name = name
         self.description = description
@@ -139,7 +137,7 @@ class Category(AbstractEntity):
                 raise TypeError("Можно добавлять только объекты Product или его наследников")
 
             if product.quantity <= 0:
-                raise ZeroQuantityError()
+                raise ValueError("Товар с нулевым количеством не может быть добавлен")
 
             self.__products.append(product)
             Category.product_count += 1
