@@ -3,7 +3,10 @@ from typing import List
 from src.abstract_entity import AbstractEntity
 from src.base_product import BaseProduct
 from src.creatable_mixin import CreatableMixin
+from src.custom_exceptions import ZeroQuantityError
+from typing import List, Optional, TypeVar, Type
 
+T = TypeVar('T', bound='Product')
 
 class Product(CreatableMixin, BaseProduct):
     """Класс для представления продукта."""
@@ -16,6 +19,7 @@ class Product(CreatableMixin, BaseProduct):
         :param price: Цена продукта
         :param quantity: Количество на складе
         """
+
         self.name = name
         self.description = description
         self.price = price
@@ -38,7 +42,7 @@ class Product(CreatableMixin, BaseProduct):
         return total_price
 
     @classmethod
-    def new_product(cls, product_data: dict, products_list: list = None):
+    def new_product(cls: Type[T], product_data: dict, products_list: Optional[List['Product']] = None) -> T:
         """
         Создает новый продукт из словаря данных
         :param product_data: Словарь с данными продукта
@@ -77,12 +81,11 @@ class Product(CreatableMixin, BaseProduct):
         return self.__price
 
     @price.setter
-    def price(self, new_price: float):
+    def price(self, new_price: float) -> None:
         """Сеттер для цены с проверками"""
         if new_price <= 0:
             print("Цена не должна быть нулевая или отрицательная")
             return
-
         # Проверяем, существует ли уже атрибут __price (для инициализации)
         if hasattr(self, "_Product__price") and new_price < self.__price:
             confirm = input(
@@ -108,31 +111,63 @@ class Category(AbstractEntity):
         :param description: Описание категории
         :param products: Список продуктов в категории
         """
-        self.__products = products
+        self.__products: List[Product] = products
         super().__init__(name, description)
         Category.category_count += 1
         Category.product_count += len(products)
 
-    def __str__(self):
-        """Строковое представление категории"""
-        total_quantity = sum(product.quantity for product in self._Category__products)
+    def __str__(self) -> str:
+        """Строковое представление категории."""
+        total_quantity = sum(product.quantity for product in self.__products)
         return f"{self.name}, количество продуктов: {total_quantity} шт."
 
     def __iter__(self):
-        """Возвращает итератор для продуктов категории"""
+        """Возвращает итератор для продуктов категории."""
         return CategoryIterator(self)
 
-    def add_product(self, product):
-        """Добавляет продукт в категорию"""
-        if not isinstance(product, Product):
-            raise TypeError("Можно добавлять только объекты Product или его наследников")
-        self._Category__products.append(product)
-        Category.product_count += 1
+    def add_product(self, product: Product) -> None:
+        """
+        Добавляет продукт в категорию.
+        :param product: Продукт для добавления
+        :raises TypeError: Если передан не объект Product или его наследник
+        :raises ZeroQuantityError: Если количество товара равно нулю
+        """
+        try:
+            if not isinstance(product, Product):
+                raise TypeError("Можно добавлять только объекты Product или его наследников")
+
+            if product.quantity <= 0:
+                raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
+            self.__products.append(product)
+            Category.product_count += 1
+            print("Товар добавлен")
+
+        except (TypeError, ZeroQuantityError) as e:
+            print(f"Ошибка добавления товара: {e}")
+            raise  # Пробрасываем исключение дальше для обработки в тестах
+        finally:
+            print("Обработка добавления товара завершена")
+
+    def middle_price(self) -> float:
+        """
+        Подсчитывает средний ценник всех товаров в категории.
+        :return: Средняя цена товаров в категории, или 0 если категория пуста
+        """
+        try:
+            if not self.__products:
+                raise ZeroDivisionError("В категории нет товаров")
+
+            total_price = sum(product.price for product in self.__products)
+            return total_price / len(self.__products)
+
+        except ZeroDivisionError:
+            return 0.0
 
     @property
     def products(self) -> str:
-        """Геттер для списка продуктов в виде строки с помощью __str__"""
-        return "\n".join(str(product) for product in self._Category__products)
+        """Геттер для списка продуктов в виде строки."""
+        return "\n".join(str(product) for product in self.__products)
 
 
 class CategoryIterator:

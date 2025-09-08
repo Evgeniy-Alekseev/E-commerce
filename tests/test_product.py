@@ -1,7 +1,8 @@
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
 
+from src.custom_exceptions import ZeroQuantityError
 from src.product import Product, Category
 from src.smartphone import Smartphone
 
@@ -368,3 +369,53 @@ def test_category_add_product_invalid_type_none():
     # Убедиться, что продукт не был добавлен
     assert len(category._Category__products) == 0
     assert Category.product_count == initial_product_count
+
+def test_category_middle_price_empty(empty_category):
+    """Тест среднего ценника для пустой категории возвращает 0"""
+    assert empty_category.middle_price() == 0.0
+
+
+def test_category_middle_price_with_products(sample_category):
+    """Тест среднего ценника для категории с товарами"""
+    # (180000 + 210000 + 31000) / 3 = 140333.333...
+    expected_avg = (180000.0 + 210000.0 + 31000.0) / 3
+    assert sample_category.middle_price() == pytest.approx(expected_avg)
+
+
+def test_category_add_product_zero_quantity():
+    """Тест добавления товара с нулевым количеством в категорию"""
+    category = Category("Test Category", "Test Description", [])
+
+    # Создаем продукт с нулевым количеством
+    product = Product("Test Product", "Test Description", 100.0, 0)
+
+    # Проверяем, что вызывается ValueError
+    with pytest.raises(ValueError):
+        category.add_product(product)
+
+
+def test_category_add_product_negative_quantity():
+    """Тест добавления товара с отрицательным количеством в категорию"""
+    category = Category("Test Category", "Test Description", [])
+
+    # Создаем продукт с отрицательным количеством
+    product = Product("Test Product", "Test Description", 100.0, -5)
+
+    # Проверяем, что вызывается ValueError
+    with pytest.raises(ValueError):
+        category.add_product(product)
+
+
+def test_category_add_product_valid_product():
+    """Тест добавления валидного продукта в категорию"""
+    category = Category("Test Category", "Test Description", [])
+
+    # Создаем валидный продукт (количество > 0)
+    product = Product("Valid Product", "Valid Description", 150.0, 3)
+
+    initial_product_count = Category.product_count
+    category.add_product(product)
+
+    assert len(category._Category__products) == 1
+    assert category._Category__products[0] is product
+    assert Category.product_count == initial_product_count + 1
